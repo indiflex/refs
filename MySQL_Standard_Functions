@@ -1,0 +1,23 @@
+select sqrt(4), abs(-2), mod(5,2), 5 % 2;
+
+select bin(7), bin(5), oct(10), conv('FF', 16, 10);
+
+select CAST('2018-12-25 11:22:22.123' AS DATETIME);
+select CAST( 1.467 AS Signed Integer ), CONVERT( 1.567, Signed Integer);
+
+select str_to_date('2018-12-03', '%Y-%m-%d');
+
+select * from Dept;
+update Dept set workdate='2018-12-25 11:22:22.123' where id = 3;
+
+select id, dname, concat(dname, ' 부서'), concat_ws('-', dname, ' 부서', '입니다') from Dept;
+
+select dept, max(ename), group_concat(ename) from Emp group by dept;
+
+select if(1 > 2, '참', '거짓'), if(1 < 2, '참', '거짓');
+
+select captain, nullif(captain, 121) from Dept;
+
+select sub.* from (select id, dname, captain, nullif(captain, 121) nn from Dept) sub
+ where nn is not null;
+ 
