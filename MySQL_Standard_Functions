@@ -21,3 +21,39 @@ select captain, nullif(captain, 121) from Dept;
 select sub.* from (select id, dname, captain, nullif(captain, 121) nn from Dept) sub
  where nn is not null;
  
+select length('abc한글😀'), char_length('abc한글😀'), bit_length('ab한'), sign(0);
+select elt(2, 'str1', 'str2', 'str3'), field('s1', 's0', 's1', 's2');
+select find_in_set('s1', 's0,s1,s2');
+select dept, find_in_set('최신세', group_concat(ename)) from Emp group by dept;
+
+select instr('str', 't'), locate('s1', 's0s1s2');
+select insert('12345', 3, 0, '/'), insert('12345', 3, 1, '/'), insert('12345', 3, 2, '//');
+select insert('12345', 3, length('//'), '//'), replace('12345', '34', '/');
+select format(12345678, 0), format(789.012356, 4), truncate(789.012356, 4);
+select left('abc', 2), upper('a'), lower('A');
+select lpad('5', 2, '0'), rpad('15', 3, '0');
+select repeat('ab', 3), concat('ab', space(3), 'cd');
+select trim(' abc.  '), trim(both 's' from 'ssstrss'), ltrim(' abc.  '), rtrim(' abc.  ');
+select trim(leading 's' from 'ssstrss'), trim(trailing 's' from 'ssstrss');
+select substring('abcdef', 2, 3); 
+select substring_index('a,b,c', ',', -1);
+
+select ename, format(salary * 10000, 0) from Emp;
+
+select now(), sysdate(), curdate(), curtime();
+select year(now()), month(now()), day(now()), month('2020-11-29'),
+	   hour(now()), minute(now()), second(now()), quarter(now());
+     -- 일 월 화 수 목 금 토
+
+select weekday('2020-11-30');   -- 월요일 0 ~
+select dayofweek('2020-11-30'); -- 일요일 1 ~
+
+select DATE(now()), TIME(now()), MAKEDATE(2020, 336), MAKETIME(19,3,50);
+select dayofyear(now()), monthname(now()), last_day(now());
+select time_to_sec('0:1:30'), period_add(202012, 12), period_diff(202103, 202011);
+select datediff('2021-03-11', '2020-12-01'), timediff('12:20:33', '11:30:20');
+
+select adddate(now(), interval 31 day), subdate(now(), interval 31 day);
+select adddate(now(), interval -31 day), subdate(now(), interval 31 day);
+
+select DATE_FORMAT(DATE_ADD(NOW(), INTERVAL -1 DAY), '%Y-%m-%d');
