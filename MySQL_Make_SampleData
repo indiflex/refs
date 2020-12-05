@@ -1,0 +1,72 @@
+use testdb;
+
+create table Dept(
+  id tinyint unsigned not null auto_increment,
+  pid tinyint unsigned not null default 0 comment '상위부서id',
+  dname varchar(31) not null,
+  PRIMARY KEY(id)
+);
+
+create table Emp(
+  id int unsigned not null auto_increment,
+  ename varchar(31) not null,
+  dept tinyint unsigned not null,
+  salary int not null default 0,
+  primary key(id),
+  foreign key(dept) references Dept(id)
+);
+
+insert into Dept(pid, dname) values (0, '영업부'), (0, '개발부');
+
+select * from Dept;
+insert into Dept(pid, dname) values (1, '영업1팀'), (1, '영업2팀'), (1, '영업3팀'),  (2, '서버팀'),  (2, '클라이언트팀');
+
+select d1.dname as '상위부서', d2.*
+  from Dept d1 inner join Dept d2 on d1.id = d2.pid;
+  
+select * from Emp;
+
+select CEIL(rand() * 7);
+select char_length('한들abc');
+
+select f_rand1('1234567');
+select f_randname();
+desc Emp;
+insert into Emp(ename, dept, salary) values (f_randname(), f_rand1('34567'), f_rand1('123456789') * 100);
+
+call sp_test_emp(250);
+
+select dept, count(*) from Emp group by dept;
+
+select dept, max(salary)
+  from Emp
+group by dept;
+
+select * from Emp where id in (4,2,1,6,9);
+
+
+-- ----------------------------------------------- 임의의 1글자 반환
+
+CREATE DEFINER=`mydeal`@`%` FUNCTION `f_rand1`(_str varchar(255)) RETURNS varchar(31) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+BEGIN
+  declare v_ret varchar(31);
+  declare v_len tinyint;
+  
+  set v_len = char_length(_str);
+  set v_ret = substring(_str, CEIL(rand() * v_len), 1);
+
+RETURN v_ret;
+END
+
+
+-- ----------------------------------------------- 임의의 이름 반환
+CREATE DEFINER=`mydeal`@`%` FUNCTION `f_randname`() RETURNS varchar(31) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+BEGIN
+  declare v_ret varchar(31);
+  declare v_lasts varchar(255) default '김이박조최전천방지마유배원';
+  declare v_firsts varchar(255) default '순신세종성호지혜가은세호윤국가나다라마바사아자차파태하결찬희';
+  
+  set v_ret = concat( f_rand1(v_lasts), f_rand1(v_firsts), f_rand1(v_firsts) );
+
+RETURN v_ret;
+END
