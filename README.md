@@ -8,7 +8,14 @@
 * [datefmt2.sh](linux/datefmt2.sh): getopts 사용하기
 * [datefmt3.sh](linux/datefmt3.sh): getopt로 길거나 짧은 옵션 주기
 
-## MySQL
+------------------------------------------------------------------
 
+## MySQL
+* [샘플 데이터 생성하기](mysql/MySQL_Make_SampleData)
+* [SQL 총정리 Part 1](mysql/MySQL_총정리_1)
+* [SQL 총정리 Part 2](mysql/MySQL_총정리_2)
+* [SQL 총정리 Part 3](mysql/MySQL_총정리_3)
+
+----------------------------------------------------------
 
 ## Python & Flask
