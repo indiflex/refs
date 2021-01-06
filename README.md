@@ -15,6 +15,8 @@
 * [SQL 총정리 Part 1](mysql/MySQL_총정리_1)
 * [SQL 총정리 Part 2](mysql/MySQL_총정리_2)
 * [SQL 총정리 Part 3](mysql/MySQL_총정리_3)
+* [유용한 내장 함수](mysql/MySQL_Standard_Functions)
+* [With - CTE 로 복잡한 쿼리도 쉽게](mysql/with_cte.sql)
 
 ----------------------------------------------------------
 
