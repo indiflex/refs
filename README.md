@@ -17,6 +17,7 @@
 * [SQL 총정리 Part 3](mysql/MySQL_총정리_3)
 * [유용한 내장 함수 - Standard Functions](mysql/MySQL_Standard_Functions)
 * [With - CTE 로 복잡한 쿼리도 쉽게](mysql/with_cte.sql)
+* [편리한 윈도우 함수를 사용하자](mysql/window_functions.sql)
 
 ----------------------------------------------------------
 
