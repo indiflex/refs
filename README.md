@@ -18,6 +18,8 @@
 * [유용한 내장 함수 - Standard Functions](mysql/MySQL_Standard_Functions)
 * [With - CTE 로 복잡한 쿼리도 쉽게](mysql/with_cte.sql)
 * [편리한 윈도우 함수를 사용하자](mysql/window_functions.sql)
+* [JSON 다루기](mysql/json_data.sql)
+* [Tip&Tech:Rollup & Pivot](mysql/MySQL_easy_to_miss.sql)
 
 ----------------------------------------------------------
 
