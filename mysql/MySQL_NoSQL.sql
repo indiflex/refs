@@ -56,3 +56,5 @@ select c.remark, cu.chatname, v.sentdt, v.msg
   from Chat c inner join ChatUser cu on c.id = cu.chat 
               inner join v_msg v on c.id = v.chat and v.id = f_lastmsgid(c.id)
  where cu.user = 1;
+ 
+ 
