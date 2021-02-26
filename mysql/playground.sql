@@ -453,9 +453,39 @@ create table Chat(
   id int unsigned not null auto_increment Primary key,
   message varbinary(32) not null);
   
+create table ChatUser(
+  id int unsigned not null auto_increment Primary key,
+  chat int unsigned not null,
+  user int unsigned not null,
+  lastread bigint not null default 0,
+  chatname varchar(63) null
+);
+
+select * from Chat;
+select * from ChatUser;
+  
 select doc->>'$.msgs[*]', json_extract(doc, '$.msgs[*].id'), json_extract(doc, '$.msgs[0]', '$.msgs[1]') from message;
 select doc->>'$.msgs', json_value(doc, '$.msgs') from message;
 select json_search(doc, 'all', 'msgs'), json_keys(doc, '$'), json_length(doc, '$.msgs') from message;
+
+select json_search(doc, 'one', '99084618157785115'), json_search(doc->>'$.msgs[*].id', 'all', '99084618157785115') from message;
+
+select doc->>'$.msgs[*].id', json_contains(doc->>'$.msgs[*].id', '99084618157785115'),
+  json_contains(doc->>'$.msgs[*].id', '99084618157785114') from message;
+
+select doc->>'$.msgs' from message where json_contains(doc->>'$.msgs[*].id', '99084618157785115');
+select doc from message where doc->>'$.msgs[*].id' = '99084618157785115';
+
+select json_extract(doc, "$.msgs[2]"), json_extract(doc->>'$.msgs', "$[2]"),
+    JSON_SEARCH(doc, 'one', '333') from message where doc->>'$.chat' = 4;
+    
+select doc, json_extract(doc, '$.msgs[*].id'), 
+    replace(replace(replace(json_extract(doc, '$.msgs[*].id'), ', ', '", "'), '[', '["'), ']', '"]'),
+   JSON_SEARCH(replace(replace(replace(json_extract(doc, '$.msgs[*].id'), ', ', '", "'), '[', '["'), ']', '"]'), 'one', 2) from message;
+   
+SELECT REPLACE(JSON_SEARCH(doc, 'one', '333'), '.msg"', '.id"') from message;
+SELECT json_value(doc, REPLACE(JSON_SEARCH(doc, 'one', '333'), '.msg"', '.id"') ) from message;
+SELECT JSON_EXTRACT(doc, REPLACE(JSON_SEARCH(doc, 'one', '333'), '.msg"', '.id"')) from message;
 
 select m.doc->>'$.chat', msg.* 
   from message m, 
@@ -465,10 +495,264 @@ select m.doc->>'$.chat', msg.*
  where m.doc->>'$.chat' = 1;
  
 select * from v_msg where chat = 2;
+select doc->'$.pins', json_value(doc, '$.pins') from message where doc->>'$._id'=3;
 
+select m.doc, t.pin from message m, json_table(doc, '$.pins[*]' columns( pin int path '$')) as t where doc->>'$._id' = 3;
+
+-- pin messages
+select * from v_msg v
+ where v._id = 8 
+   and v.id in
+    (select t.pin from message, json_table(doc, '$.pins[*]' columns( pin bigint path '$')) as t where doc->>'$._id' = 8);
+    
+-- 목록
+select * from v_msg where chat = 4 order by id desc limit 2;
+
+select * from v_msg where chat = 2 and id in (select json_value(doc, '$.pins') from message where doc->>'$._id' = 3);
+select * from v_msg where chat = 2 and id in (10, 15);
+select doc->>'$.msgs[*].sender' from message;
 select uuid(), uuid_to_bin(uuid()), hex(uuid());
-select uuid(), f_uuid(), uuid_short(), uuid_short();
+select uuid(), f_uuid(), uuid_short(), ~0;
+select uuid_short(), convert(9.908461815778512e16, unsigned integer),
+    cast(99084618157785121 as unsigned integer), cast(uuid_short() as char);
 
+select * from Test;
+alter table Test add column t text(2)
+-- update Test set uid=uuid_short() where id=5;
+
+select id from v_msg where chat=4 order by id desc limit 1;
+select * from v_msg where _id=8;
 
 -- msg.modify('_id=3').arrayAppend('msgs', {id: mysqlx.expr("ifnull(json_length(msgs),0) + 1"), msg: '334'})
 -- msg.modify('_id=4').set('chat', mysqlx.expr('uuid_short()'));
+-- msg.modify('_id=4').set('msgs[1].sentdt', mysqlx.expr("current_timestamp()"))
+select count(*) from Emp;
+explain select * from Emp where id = 10;
+explain select * from Dept d inner join Emp e on d.id = e.dept where e.id=10;
+explain select * from Dept where id in (select distinct dept from Emp);
+explain select * from Emp where id = 1 UNION select * from Emp where id = 2;
+explain select * from Emp where ename = '홍길동';
+explain select * from Emp where dept = 1;
+select * from Emp where ename = '홍길동';
+
+
+select * from Emp where dept > 1;
+select * from Emp where dept > 1 limit 5 offset 10;
+
+show index from Emp;
+show table status where Name in ('Emp', 'User');
+analyze table Emp;
+
+show global status like 'Innodb_pages%';
+select * from Emp where dept = 5 order by ename;
+show global status like 'Innodb_pages_read';
+select 261 * 62;
+
+explain select * from Emp where dept = 5 order by ename;
+
+explain select * from Emp where id in (select distinct captain from Dept);
+explain select * from Emp e where exists (select distinct captain from Dept where captain = e.id);
+
+select * from Emp where id in (select distinct captain from Dept);
+select * from Emp e where  not exists (select distinct captain from Dept where captain = e.id);
+
+select * from Emp;
+
+drop index idx_Emp_dept_ename on Emp;
+alter table Emp DROP index idx_Emp_dept_ename;
+-- Error Code: 1553. Cannot drop index 'idx_Emp_dept_ename': needed in a foreign key constraint
+
+create table Notice(
+  id int unsigned not null auto_increment Primary Key,
+  createdate timestamp not null default CURRENT_TIMESTAMP comment '작성일',
+  workdate timestamp not null default CURRENT_TIMESTAMP on Update CURRENT_TIMESTAMP comment '수정일',
+  title varchar(255) not null comment '제목',
+  writer int unsigned null comment '작성자',
+  contents text null comment '내용'
+);
+
+ALTER TABLE Notice ADD CONSTRAINT fk_Notice_user
+  FOREIGN KEY (writer) REFERENCES User(id) ON DELETE SET NULL;
+
+insert into Notice(title, contents) values('세종대왕', '조선의 제4대 국왕이다.');
+insert into Notice(title, contents) values('단군', '단군왕검(檀君王儉)은 한민족의 시조이자 고조선(古朝鮮)의 국조(國祖), 대종교의 시작.');
+insert into Notice(title, contents) values('정약용', '조선 후기의 문신이자 실학자·저술가·시인·철학자·과학자·공학자이다.');
+insert into Notice(title, contents) values('계백', '백제 말기의 군인이다.');
+insert into Notice(title, contents) values('이순신', '조선 중기의 무신이었다. 본관은 덕수(德水), 자는 여해(汝諧), 시호는 충무(忠武).');
+insert into Notice(title, contents) values('김유신', '신라의 화랑의 우두머리였으며 태대각간(太大角干)이었고 신라에 귀순한 가야 왕족의 후손.');
+-- show create table Notice;
+show index from Notice;
+
+CREATE FULLTEXT INDEX ft_idx_Notice_contents on Notice(title, contents);
+drop index ft_idx_Notice_contents on Notice;
+select * from Notice;
+explain select * from Notice where contents like '%조선%';
+select id, title, contents from Notice where contents like '%조선%';
+select * from Notice where match(title, contents) against('조선');
+select * from Notice where match(contents) against('한민족의');
+
+show variables like 'innodb_ft%';
+show variables like 'innodb_ft_aux_table';
+-- select * from iformation_schema.innodb_ft_default_stopword;
+
+select * from Notice where match(title, contents) against('조선');
+select * from Notice where match(title, contents) against('세종' IN NATURAL LANGUAGE MODE);
+select * from Notice where match(title, contents) against('조선' IN BOOLEAN MODE);
+select * from Notice where match(title, contents) against('조선*' IN BOOLEAN MODE);
+select * from Notice where match(title, contents) against('계백' IN BOOLEAN MODE);
+select * from Notice where match(title, contents) against('무신*' IN BOOLEAN MODE);
+select * from Notice where match(title, contents) against(concat('세종', '*') IN BOOLEAN MODE);
+select * from Notice where match(title, contents) against('대종교' IN BOOLEAN MODE);
+
+show variables like 'innodb_optimize_fulltext_only';
+SET GLOBAL innodb_optimize_fulltext_only=ON;
+OPTIMIZE TABLE Notice;
+          
+set global innodb_ft_aux_table = 'testdb/Notice';
+select * from information_schema.innodb_ft_index_table;
+select * from information_schema.innodb_ft_index_table where word='조선';
+
+create table StopWord(value varchar(31) not null);
+
+truncate table StopWord;
+select * from StopWord;
+select value, count(*) from StopWord group by value having count(*) > 1;
+-- set global innodb_ft_server_stopword_table='mydealdb/StopWord';
+
+drop table Notice;
+drop table StopWord;
+
+
+-- Partition --------------------------------------------------------
+create table PartiRangeTest (
+  studentno varchar(7) not null,
+  enteryear smallint not null,
+  studentname varchar(31) not null )
+  
+  partition by RANGE(enteryear) (
+    partition p1 values less than(2000),
+    partition p2 values less than(2010),
+    partition p3 values less than MAXVALUE
+);
+
+insert into PartiRangeTest(studentno, enteryear, studentname)
+  values ('8809080', 1988, '팔팔학번'),
+         ('0809080', 2008, '공팔학번'),
+         ('1809080', 2018, '일팔학번');
+
+select * from PartiRangeTest;
+
+select * from information_schema.partitions
+ where table_name='PartiRangeTest';
+
+explain select * from PartiRangeTest where enteryear = 2018;
+select * from PartiRangeTest where enteryear = 2018;
+
+explain select * from PartiRangeTest where studentno = '0809080';
+select * from PartiRangeTest where studentno = '0809080';
+
+delete from PartiRangeTest where enteryear = 2010;
+
+create table PartiListTest (
+  studentno varchar(7) not null,
+  dept varchar(31) not null)
+  
+  partition by LIST COLUMNS (dept) (
+    partition p1 values IN ('컴공', '산공'),
+    partition p2 values IN ('사학', '철학')
+);
+
+insert into PartiListTest(studentno, dept)
+  values ('8809080', '컴공'),
+         ('0809080', '산공'),
+         ('1809080', '철학');
+
+select * from PartiListTest;
+
+select * from information_schema.partitions
+ where table_name='PartiListTest';
+
+explain select * from PartiListTest where dept='컴공';
+
+alter table PartiRangeTest
+    REORGANIZE Partition p3 INTO (
+        partition p3 values less than (2020),
+        partition p4 values less than MAXVALUE
+    );
+
+optimize table PartiRangeTest;
+    
+select * from information_schema.partitions
+ where table_name='PartiRangeTest';
+
+explain select * from PartiRangeTest where enteryear = 2009;
+
+Alter table PartiRangeTest
+    REORGANIZE Partition p1, p2 INTO (
+        partition p1_2 values less than(2010)
+    );
+
+optimize table PartiRangeTest;
+    
+select * from information_schema.partitions
+ where table_name='PartiRangeTest';
+
+explain select * from PartiRangeTest where enteryear = 2009;
+
+Alter table PartiRangeTest DROP Partition p1_2;
+
+optimize table PartiRangeTest;
+    
+select * from information_schema.partitions
+ where table_name='PartiRangeTest';
+
+drop table PartiRangeTest;
+drop table PartiListTest;
+desc Test;
+select * from Test;
+select * from Test where id < 1;
+insert into Test(ttt, dept) values ('bbb', 5), ('ccc', 6);
+update Test set ttt='CCC' where id = 7;
+delete from Test where id = 6;
+delete from Test where id=4;
+delete from Test where id=3;
+delete from Test where id=2;
+
+select * from Dept;
+update Dept set empcnt=21 where id=14;
+delete from Dept where id = 14;
+
+use mydealdb;
+select * from Dept;
+
+drop table Dept;
+
+use testdb;
+
+drop table Test;
+show binary logs;
+
+show databases;
+
+create table Test (
+  id int unsigned not null auto_increment Primary Key,
+  ttt varchar(31) not null,
+  dept tinyint unsigned not null
+);
+
+insert into Test(ttt, dept)
+         values ('aaa1', 3), ('aaa2', 4), ('aaa3', 5),
+                ('aaa4', 6), ('aaa5', 7);
+
+delete from Test where id in (3,4,5);
+
+select * from Test;
+
+delete from Test where id in (6,7);
+
+insert into Test(ttt, dept) values ('bbb', 5), ('ccc', 6);
+update Test set ttt='CCC' where id = 7;
+
+insert into Test(ttt, dept) values('씨씨뷐', 7);
+
+delete from Test where id > 0;
