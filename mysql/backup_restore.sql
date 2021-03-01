@@ -25,3 +25,4 @@ delete from Test where id in (6,7);
 
 select @@server_id;
 show master status;
+

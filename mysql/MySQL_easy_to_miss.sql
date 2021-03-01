@@ -27,11 +27,11 @@ select dept, dept = 3
 select ~0;
  
 select '평균급여' as '구분',
-    format(avg(case when dept = 3 then salary else 0 end) * 10000, 0) '영업1팀',
-    format(avg(case when dept = 4 then salary else 0 end) * 10000, 0) '영업2팀',
-    format(avg(case when dept = 5 then salary else 0 end) * 10000, 0) '영업3팀',
-    format(avg(case when dept = 6 then salary else 0 end) * 10000, 0) '서버팀',
-    format(avg(case when dept = 7 then salary else 0 end) * 10000, 0) '클라팀'
+    format(avg(case when dept = 3 then salary end) * 10000, 0) '영업1팀',
+    format(avg(case when dept = 4 then salary end) * 10000, 0) '영업2팀',
+    format(avg(case when dept = 5 then salary end) * 10000, 0) '영업3팀',
+    format(avg(case when dept = 6 then salary end) * 10000, 0) '서버팀',
+    format(avg(case when dept = 7 then salary end) * 10000, 0) '클라팀'
   from Emp
 UNION
 select '급역합계',
