@@ -70,3 +70,16 @@ BEGIN
 
 RETURN v_ret;
 END
+
+-- ----------------------------------------------- 직원 생성 _cnt 개
+CREATE DEFINER=`root`@`%` PROCEDURE `sp_test_emp`(_cnt int)
+BEGIN
+    declare v_idx int default 0;
+    
+    while v_idx < _cnt
+    do
+        insert into Emp(ename, dept, salary) values (f_randname(), f_rand1('1234567'), f_rand1('123456789') * 100);
+        
+        set v_idx = v_idx + 1;
+    end while;
+END
